@@ -1,0 +1,165 @@
+import java.util.*;
+
+class Question {
+    String question;
+    String[] options;
+    int correctAnswer; // 1-4
+    String level;
+
+    Question(String question, String[] options, int correctAnswer, String level) {
+        this.question = question;
+        this.options = options;
+        this.correctAnswer = correctAnswer;
+        this.level = level;
+    }
+
+    void display() {
+        System.out.println("\n[" + level.toUpperCase() + "] " + question);
+        for (int i = 0; i < options.length; i++) {
+            System.out.println((i + 1) + ". " + options[i]);
+        }
+    }
+
+    boolean isCorrect(int answer) {
+        return answer == correctAnswer;
+    }
+}
+
+class User {
+    String name;
+    int score;
+
+    User(String name) {
+        this.name = name;
+        this.score = 0;
+    }
+}
+
+public class Main {
+
+    static Scanner sc = new Scanner(System.in);
+
+    static List<Question> questions = new ArrayList<>();
+    static List<User> leaderboard = new ArrayList<>();
+
+    // TIMER LIMIT (seconds per question)
+    static final int TIME_LIMIT = 10;
+
+    public static void main(String[] args) {
+
+        seedQuestions();
+
+        System.out.print("Enter your name: ");
+        String name = sc.nextLine();
+
+        User user = new User(name);
+
+        System.out.println("\nWelcome " + name + " to Advanced Quiz System!");
+
+        startQuiz(user);
+
+        leaderboard.add(user);
+
+        showLeaderboard();
+    }
+
+    static void startQuiz(User user) {
+
+        Collections.shuffle(questions);
+
+        int score = 0;
+
+        for (Question q : questions) {
+
+            q.display();
+
+            long startTime = System.currentTimeMillis();
+
+            System.out.print("Your answer (1-4): ");
+            int ans = sc.nextInt();
+
+            long endTime = System.currentTimeMillis();
+
+            long timeTaken = (endTime - startTime) / 1000;
+
+            if (timeTaken > TIME_LIMIT) {
+                System.out.println("⏰ Time Over! (-1 penalty)");
+                score -= 1;
+                continue;
+            }
+
+            if (q.isCorrect(ans)) {
+                System.out.println("✔ Correct!");
+                score += getMarks(q.level);
+            } else {
+                System.out.println("❌ Wrong!");
+                System.out.println("Correct Answer: " + q.correctAnswer);
+                score -= 1; // negative marking
+            }
+        }
+
+        user.score = score;
+
+        System.out.println("\n=====================");
+        System.out.println("FINAL SCORE: " + score);
+        System.out.println("=====================");
+    }
+
+    static int getMarks(String level) {
+        switch (level) {
+            case "easy": return 1;
+            case "medium": return 2;
+            case "hard": return 3;
+            default: return 1;
+        }
+    }
+
+    static void showLeaderboard() {
+
+        System.out.println("\n🏆 LEADERBOARD");
+
+        leaderboard.sort((a, b) -> b.score - a.score);
+
+        for (User u : leaderboard) {
+            System.out.println(u.name + " -> " + u.score);
+        }
+    }
+
+    static void seedQuestions() {
+
+        questions.add(new Question(
+                "What is JVM?",
+                new String[]{"Java Virtual Machine", "Java Variable Model", "Joint Venture Module", "None"},
+                1,
+                "easy"
+        ));
+
+        questions.add(new Question(
+                "Which keyword is used for inheritance?",
+                new String[]{"this", "extends", "super", "implements"},
+                2,
+                "easy"
+        ));
+
+        questions.add(new Question(
+                "Which collection allows key-value pairs?",
+                new String[]{"List", "Set", "Map", "Queue"},
+                3,
+                "medium"
+        ));
+
+        questions.add(new Question(
+                "Which method starts a thread?",
+                new String[]{"init()", "start()", "run()", "execute()"},
+                2,
+                "medium"
+        ));
+
+        questions.add(new Question(
+                "What is time complexity of binary search?",
+                new String[]{"O(n)", "O(n^2)", "O(log n)", "O(1)"},
+                3,
+                "hard"
+        ));
+    }
+}
